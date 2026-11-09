@@ -252,19 +252,35 @@ Add a new record to `RAW.airport_comments`. Then materialize the incremental mod
 
 Add your solution in the next lines:
 * Adding a new record:
-  ```
-  REPLACE THIS CODE BLOCK BY PASTING THE SQL for adding a new record to `RAW.airport_comments`
+  ```sql
+  insert into airstats.raw.airport_comments
+      (id, airport_ident, date, member_nickname, subject, body)
+  values
+      (602622, 'CA-0178', current_timestamp(), 'tu_nickname', 'Prueba incremental', 'Comentario de prueba para el ejercicio 8');
+
+  insert into airstats.raw.airport_comments
+      (id, airport_ident, date, member_nickname, subject, body)
+  values
+      (602623, 'CA-0179', current_timestamp(), 'esteban_lopez', 'Prueba incremental 2', 'Segundo comentario de prueba para el ejercicio 8');
   ```
 * Command to execute to update this model (but only this model, not all the models):
+  ```bash
+  dbt run --select silver_airport_comments
   ```
-  REPLACE THIS CODE BLOCK BY PASTING THE dbt COMMAND YOU EXECUTED
-  ``` 
+  Result: `OK created sql incremental model DEV.silver_airport_comments [SUCCESS 2 in 3.73s]`
 * Execute an SQL on the Snowflake UI to ensure the new record has been added:
+  ```sql
+  select comment_id, member_nickname, comment_body, loaded_at
+  from airstats.dev.silver_airport_comments
+  where comment_id > 602621
+  order by comment_id;
   ```
-  REPLACE THIS CODE BLOCK BY PASTING 
-  1) THE SQL to extract the new record from `silver_airport_comments`
-  2) THE result you see in Snowflake
-  ``` 
+  Result (2 rows):
+
+  | COMMENT_ID | MEMBER_NICKNAME | COMMENT_BODY | LOADED_AT |
+  |---|---|---|---|
+  | 602622 | tu_nickname | Comentario de prueba para el ejercicio 8 | 2026-11-09 15:47:36.154 -0800 |
+  | 602623 | esteban_lopez | Segundo comentario de prueba para el ejercicio 8 | 2026-11-09 15:47:36.154 -0800 |
 
 **Requirements** 
 * Every table in the silver layer must be materialized as a table by default through instructions in `dbt_project.yml`

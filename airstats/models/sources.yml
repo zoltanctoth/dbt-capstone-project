@@ -1,0 +1,10 @@
+sources:
+  - name: airstats_raw   # the group name for airports and runways
+    schema: raw          # where the tables live
+    tables:
+      - name: airports
+      - name: runways
+  - name: comments       # required by the README
+    schema: raw          # still needs to point at the real schema
+    tables:
+      - name: airport_comments
