@@ -296,13 +296,16 @@ Add your solution in the next lines:
 The airport `Los Angeles County Sheriff's Department Heliport` (airport_ident: `01CN`) must be closed. Simulate this change by updating the `type` column of this heliport to `closed` in `RAW.AIRPORTS`, then run `dbt run --select silver_airports` followed by `dbt snapshot`.
 
 * Updating the record to "closed":
-  ```
-  REPLACE THIS BLOCK BY PASTING THE SQL you executed
+  ```sql
+  update airstats.raw.airports
+  set type = 'closed'
+  where ident = '01CN';
   ```
 * Command to execute and snapshot update:
+  ```bash
+  dbt run --select silver_airports
+  dbt snapshot
   ```
-  REPLACE THIS CODE BLOCK BY PASTING THE dbt COMMAND YOU EXECUTED
-  ``` 
 
 #### Analyses
 * Create `analyses/la_heliport_closed.sql` where you validate if the snapshot went through - select every line corresponding to this airport in the snapshot table.
