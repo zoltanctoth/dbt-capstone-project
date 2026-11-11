@@ -7,7 +7,7 @@ models:
             min_value: 70000
     columns:
       - name: airport_ident
-        description: "Airport identifier from OurAirports (the ident column). Primary key of the table."
+        description: '{{ doc("airport_ident") }}'
         data_tests:
           - unique
           - not_null
@@ -48,7 +48,7 @@ models:
           - unique
           - not_null
       - name: airport_ident
-        description: "Code of the airport this runway belongs to. Joins to silver_airports.airport_ident."
+        description: '{{ doc("airport_ident") }}'
         data_tests:
           - relationships:
               arguments:
@@ -79,7 +79,7 @@ models:
           - unique
           - not_null
       - name: airport_ident
-        description: "Code of the airport the comment refers to. Joins to silver_airports.airport_ident."
+        description: '{{ doc("airport_ident") }}'
         data_tests:
           - relationships:
               arguments:
