@@ -1,0 +1,103 @@
+models:
+  - name: silver_airports
+    description: "Airports from OurAirports. Copy of src_airports with no transformations (renamed columns only)."
+    data_tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 70000
+    columns:
+      - name: airport_ident
+        description: "Airport identifier from OurAirports (the ident column). Primary key of the table."
+        data_tests:
+          - unique
+          - not_null
+      - name: airport_type
+        description: "Airport classification: small_airport, medium_airport, large_airport, heliport, seaplane_base, balloonport or closed."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['small_airport', 'medium_airport', 'large_airport', 'heliport', 'seaplane_base', 'balloonport', 'closed']
+      - name: airport_name
+        description: "Official airport name."
+      - name: airport_lat
+        description: "Latitude in decimal degrees (-90 to 90)."
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: -90
+                max_value: 90
+      - name: airport_long
+        description: "Longitude in decimal degrees (-180 to 180)."
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: -180
+                max_value: 180
+      - name: continent
+        description: "Two-letter continent code (e.g. EU, NA)."
+      - name: iso_country
+        description: "ISO 3166-1 alpha-2 country code (e.g. US, DE)."
+      - name: iso_region
+        description: "ISO 3166-2 region code (e.g. US-CA)."
+  - name: silver_runways
+    description: "Runways from OurAirports. Same columns as src_runways; a null or empty surface is replaced by __UNKNOWN__."
+    columns:
+      - name: runway_id
+        description: "Runway identifier. Primary key of the table."
+        data_tests:
+          - unique
+          - not_null
+      - name: airport_ident
+        description: "Code of the airport this runway belongs to. Joins to silver_airports.airport_ident."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_airports')
+                field: airport_ident
+              config:
+                severity: warn
+      - name: runway_length_ft
+        description: "Runway length in feet."
+      - name: runway_width_ft
+        description: "Runway width in feet."
+      - name: runway_surface
+        description: "Surface material code (e.g. ASP, CON, GRS, GRE). __UNKNOWN__ when the source value is null or empty."
+      - name: runway_lighted
+        description: "1 if the runway is lit at night, 0 otherwise."
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              arguments:
+                value_set: [0, 1]
+      - name: runway_closed
+        description: "1 if the runway is closed, 0 otherwise."
+  - name: silver_airport_comments
+    description: "User comments about airports. Incremental model: comments with an empty body are removed, a null nickname becomes __UNKNOWN__, and only comment_id values above the current maximum are added."
+    columns:
+      - name: comment_id
+        description: "Comment identifier. Primary key of the table and the column the incremental logic compares."
+        data_tests:
+          - unique
+          - not_null
+      - name: airport_ident
+        description: "Code of the airport the comment refers to. Joins to silver_airports.airport_ident."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_airports')
+                field: airport_ident
+              config:
+                severity: warn
+      - name: comment_timestamp
+        description: "When the comment was posted."
+      - name: member_nickname
+        description: "Username of the commenter. __UNKNOWN__ when the source value is null."
+        data_tests:
+          - dbt_expectations.expect_column_values_to_not_be_in_set:
+              arguments:
+                value_set: ['']
+      - name: comment_subject
+        description: "Subject line of the comment."
+      - name: comment_body
+        description: "Comment text. Never null or empty in this table."
+      - name: loaded_at
+        description: "When dbt loaded the row into this table (current_timestamp at run time)."

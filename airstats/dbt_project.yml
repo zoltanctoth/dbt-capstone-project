@@ -34,3 +34,6 @@ models:
       silver:
           +materialized: table
 
+data_tests:
+  airstats:
+    +store_failures: true
